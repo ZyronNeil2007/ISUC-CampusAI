@@ -157,6 +157,7 @@ The following are outside the initial scope:
 - Official issuance of university documents.
 - Real-time access to university systems.
 - Automated decisions about admission, scholarships, or graduation eligibility.
+- User accounts and sign-in (planned for later versions; see 16.6 and 17.3).
 
 CampusAI is an information and assistance system, not a replacement for university personnel or official administrative platforms.
 
@@ -674,11 +675,12 @@ The manifest should contain:
 - Document count.
 - Supported application version.
 - File hashes.
+- Digital signature and signing key identifier (see 16.7).
 - Verification information.
 
 The knowledge pack should be downloadable as a single update package or as verified incremental updates.
 
-The application should validate package integrity before installation.
+The application should validate package integrity and authenticity before installation (see 16.7).
 
 ## 8.7 ISU Cabagan Initial Content Plan
 
@@ -875,7 +877,9 @@ During offline operation:
 - No mandatory cloud authentication.
 - No remote chat-history synchronization.
 
-Optional network access may be used for model downloads and approved information updates.
+Optional network access may be used for model downloads, approved information updates, and optional account sign-in (see 16.6).
+
+Signing in must never be required to use the assistant. An expired or unavailable sign-in session must not disable any offline feature.
 
 The application must clearly distinguish offline operation from connected update mode.
 
@@ -1095,6 +1099,17 @@ Future:
 - Responsive design testing.
 - Accessibility testing.
 - Performance benchmarking.
+
+## 12.7 Authentication and Signing (Future Versions)
+
+Sign-in is not part of v0.1. When it is introduced, the recommended components are:
+
+- Google Identity Services (Sign in with Google) as the primary provider.
+- A small server-side verifier or a managed authentication service to validate sign-in tokens. The student application itself remains a static PWA.
+- The Web Crypto API for knowledge-pack signature verification inside the student application.
+- Role data and the audit log stored in the administrative component, separate from the offline student application.
+
+The final choice of authentication service must be reviewed for cost, data location, and privacy implications before adoption.
 
 ---
 
@@ -1378,12 +1393,13 @@ Students should be able to:
 
 - Validate downloaded knowledge packages.
 - Verify package integrity using cryptographic hashes.
+- Verify package authenticity using a digital signature (see 16.7).
 - Sanitize displayed document content.
 - Prevent unsafe HTML rendering.
 - Avoid storing secrets in frontend source code.
 - Use a strict Content Security Policy where compatible with the AI runtime.
 - Avoid unnecessary third-party scripts.
-- Protect administrative publishing workflows in future versions.
+- Protect administrative publishing workflows in future versions (see 17.3).
 
 ## 16.5 Privacy Limitations
 
@@ -1392,6 +1408,76 @@ Local processing reduces the need to transmit student questions to external AI s
 Browser extensions, shared devices, device compromise, downloaded files, and browser storage behavior can still affect privacy.
 
 The privacy policy must accurately explain these limitations.
+
+## 16.6 Optional Sign-In and Account Verification (Future Versions)
+
+CampusAI does not require accounts. Sign-in is an optional layer for specific convenience features and for authorized staff. It must not weaken the offline-first and privacy-first principles.
+
+### Principles
+
+- Sign-in is never required to use the assistant, the campus directory, the campus map, announcements, or the student guide.
+- Sign-in runs only in connected mode. The offline assistant must not depend on it.
+- An expired, revoked, or unavailable sign-in session must not disable any offline feature.
+- Authentication is delegated to the provider, so CampusAI never receives or stores passwords.
+- A sign-in must never be presented as proof of enrollment, admission, or any other official student status.
+
+### Who Can Sign In
+
+| Group | Sign-in | Purpose |
+|---|---|---|
+| Students, incoming students, transferees, and visitors | Optional | Convenience features, such as syncing the admission checklist (6.3) and preferences across devices |
+| Authorized university staff | Required for administrative functions | Managing and publishing knowledge (see 17.3) |
+
+Synchronization is opt-in, as required by 6.3. Conversation history is not synchronized and remains on the device.
+
+### Providers
+
+- Google (Sign in with Google) is the primary provider. The university appears to use Google Workspace, because the ISU Cabagan website links Google Sites hosted under the isu.edu.ph domain (observed November 2026). This must be confirmed with the MIS office.
+- Other providers may be added later if they can confirm university affiliation, for example Microsoft 365 if the university uses it.
+- General social logins are not planned, because they cannot verify university affiliation and add no verification value.
+
+### Verification Levels
+
+| Level | How it is established | What it allows |
+|---|---|---|
+| Anonymous | No sign-in | The full assistant and all public campus information |
+| Signed in | The user signs in with a provider account whose email the provider has verified | Optional convenience features, such as checklist and preference sync |
+| Verified ISU account | The user signs in with a university-domain account, and the domain is confirmed on the server | An optional "ISU account" label. No additional access to official information |
+
+A verified ISU account shows only that the user holds a university account. It is not proof of current enrollment, because accounts may remain active after a student leaves.
+
+This level depends on confirming with the MIS office that students are issued university-domain accounts. If they are not, it applies to staff only, and the system must not ask students for student ID numbers as a substitute (see 16.2).
+
+### Data Handling
+
+- Store only a random account identifier, the verification level, and the user's settings. Do not store the full provider profile.
+- Do not keep provider tokens longer than the session requires.
+- Show a privacy notice and obtain consent before an account is created.
+- Allow users to delete their account and all associated data.
+- Encrypt synchronized data in transit and at rest.
+- Coordinate with the university's data protection officer before launch, because email addresses and names are personal data under the Data Privacy Act of 2012 (RA 10173).
+
+### Technical Requirements
+
+- Validate sign-in tokens on the server, including signature, audience, and expiry. A check performed only in the browser must never be trusted.
+- Confirm the hosted-domain (`hd`) claim on the server before granting a verified level.
+- Load the provider's sign-in script only when the user chooses to sign in, and never on the offline assistant page. The script is a third-party resource, so the Content Security Policy must allow it only where it is needed (see 16.4).
+- After sign-in, keep a local session so the application continues to work offline.
+
+## 16.7 Knowledge Pack Signing
+
+The file hashes in the manifest (8.6) detect corruption, but they do not show who published a pack. Anyone who can replace a pack could also replace its hashes.
+
+To protect students from altered or fake information:
+
+- Each knowledge-pack manifest must carry a digital signature created with the university's publishing key.
+- The student application contains the matching public key and verifies the signature before installing a pack. Verification works offline and does not require sign-in.
+- The manifest records the signing key identifier and the signature algorithm.
+- The private signing key is held only by the publishing component. It is never stored in the student application or frontend source code, and it is used only when a Publisher (17.3) publishes a pack.
+- If verification fails, the application must reject the pack, keep the previous verified pack, and show a clear message to the user.
+- A key rotation and revocation procedure must exist. The application must be able to trust a new public key through an update signed by the previous key.
+
+Signature verification can be implemented with the browser's Web Crypto API.
 
 ---
 
@@ -1428,6 +1514,37 @@ The administrative publishing process may require a connected environment.
 However, the student-facing AI inference and retrieval system must remain fully on-device.
 
 The admin publishing component should be separated from the offline student application.
+
+## 17.3 Administrator Sign-In and Roles
+
+The administrative component must require sign-in. It is separate from the offline student application (see 17.2).
+
+### Authentication
+
+- Sign in with a university-domain Google account, with the domain confirmed on the server (see 16.6).
+- Domain membership alone does not grant administrative access. Each staff member with administrative access must also be on an allowlist maintained by the Access Manager.
+- Require 2-Step Verification for administrative accounts.
+- Expire sessions after a period of inactivity, and require re-authentication before publishing.
+
+### Roles
+
+| Role | Responsibility | Related step in 17.2 |
+|---|---|---|
+| Editor | Uploads documents, edits metadata, and checks extracted content | 1 and 3 |
+| Verifier | Confirms content on behalf of the responsible office and sets the verification status (8.5) | 4 |
+| Publisher | Publishes and signs knowledge-pack versions (16.7) | 7 |
+| Access Manager | Maintains the allowlist and role assignments. Designated by the university | None |
+
+The term "Administrator" in 17.2 refers to an Editor (steps 1 and 3) or a Publisher (step 7).
+
+Role rules:
+
+- No single account may upload, verify, and publish the same document.
+- Only a Verifier of the responsible office may set a document to Verified.
+
+### Audit Log
+
+Record who uploaded, edited, verified, published, or changed access for any item, with the date and time. No role may edit or delete audit log entries.
 
 ---
 
@@ -1593,6 +1710,7 @@ Tasks:
 - Implement knowledge-pack installation.
 - Implement version checking.
 - Implement package validation.
+- Implement knowledge-pack signature verification (see 16.7).
 - Implement persistent storage requests.
 - Implement recovery and re-download workflows.
 
@@ -1656,6 +1774,14 @@ Verify that:
 - Conversations can be saved and deleted.
 - Campus directory searches work.
 - The application works offline.
+
+After sign-in and knowledge-pack signing are introduced, also verify that:
+
+- The assistant works fully without signing in.
+- The assistant keeps working offline after a sign-in session expires.
+- A knowledge pack with an invalid or missing signature is rejected, and the previous verified pack stays in use.
+- Administrative sign-in rejects accounts that are outside the university domain or not on the allowlist.
+- A single account cannot upload, verify, and publish the same document.
 
 ## 20.2 AI Answer Evaluation
 
@@ -1732,6 +1858,10 @@ Participation should be voluntary and handled with appropriate research consent 
 | Model gives misleading policy advice | Strong grounding rules and official-source citations |
 | Unsupported campus locations | Require verified map information |
 | Incomplete university information | Clearly disclose coverage limitations |
+| Unauthorized person publishes false information | University-domain sign-in with an allowlist, separated roles, an audit log, and signed knowledge packs |
+| Tampered or forged knowledge pack | Digital signature verified inside the application (16.7) |
+| Sign-in outage or expired session blocks use | Sign-in is optional and never gates offline features |
+| Sign-in data creates privacy exposure | Minimal account data, consent, account deletion, and a privacy review before launch (16.6) |
 
 ---
 
@@ -1795,6 +1925,8 @@ Possible future versions:
 - Knowledge-pack publishing.
 - Version management.
 - Update notifications.
+- Staff and administrator sign-in with role-based access (see 17.3).
+- Digital signing of knowledge packs (see 16.7).
 
 ### v0.5 — Android Integration
 - Native Android interface.
@@ -1802,6 +1934,7 @@ Possible future versions:
 - Shared knowledge-pack format.
 - Shared AI evaluation dataset.
 - Android-specific model optimization.
+- Optional student sign-in for syncing the admission checklist and preferences across devices (see 16.6).
 
 ### v1.0 — Full CampusAI Release
 - Complete campus information coverage.
