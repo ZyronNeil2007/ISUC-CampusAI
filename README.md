@@ -680,6 +680,140 @@ The knowledge pack should be downloadable as a single update package or as verif
 
 The application should validate package integrity before installation.
 
+## 8.7 ISU Cabagan Initial Content Plan
+
+This plan defines which ISU Cabagan information should be collected for the knowledge pack, in priority order. Each item is mapped to a knowledge category from 8.3.
+
+The campus structure below was taken from the official ISU Cabagan website and public ISU documents as observed in November 2026. It is a collection checklist, not verified content. Every item must pass the verification process in 8.5 before it is published in a knowledge pack.
+
+### Priority 1 — Core Official Documents
+
+Collect these first. They are expected to answer the largest share of student questions.
+
+| Document | Why it matters | Category |
+|---|---|---|
+| ISU Student Manual | Covers university rules, grading, retention, conduct, shifting, and other student policies. ISU publishes a downloadable copy at isu.edu.ph. The current edition must be confirmed. | university_policies |
+| Citizen's Charter (Cabagan Campus edition) | Lists, for each office, the service steps, requirements, fees, and processing times. It is the best official source for the document request guides in 6.9 and for questions about which office handles a concern. | document_requests, campus_offices |
+
+A 2026 first edition of the ISU Citizen's Charter exists, and other campuses such as Ilagan and Roxas host their own copies. A Cabagan-specific edition was not located during initial research. It must be requested from the campus, likely through the Planning or Quality Assurance office.
+
+### Priority 2 — Campus Structure
+
+**Colleges and Programs**
+
+The ISU Cabagan website lists the following colleges:
+
+- College of Criminal Justice Education (CCJE).
+- College of Computing Studies, Information and Communication Technology (CCSICT).
+- College of Development Communication and Arts & Sciences (CDCAS).
+- College of Forestry and Environmental Management (CFEM).
+- College of Education (CEd).
+- College of Business Management (CBM).
+- College of Agriculture, Science and Technology.
+- College of Engineering (BS Computer Engineering and BS Electronics Engineering).
+
+For each college, collect:
+
+- Program list.
+- Curriculum and course prerequisites.
+- Program-specific requirements, such as on-the-job training, thesis, or capstone.
+- Accreditation status.
+- Responsible college office.
+
+The Program Offerings page of the website currently appears to be a single image. Its content must be transcribed and verified manually.
+
+Category: academic.
+
+**Offices and Student Services**
+
+Create a directory entry for each office or service listed on the website, using the fields defined in 6.4:
+
+- Registrar.
+- Guidance (the website lists the online admission and enrollment system under this office).
+- Scholarship.
+- Office of Student Affairs and Services (OSAS).
+- Library, including the Online Reference Desk.
+- Medical and Dental services.
+- Student Housing.
+- Student organizations.
+- Socio-cultural activities.
+- Student publication (The Geyser).
+- MIS/MIST office (issues campus Wi-Fi vouchers; other services to be confirmed).
+- Gender and Development (GAD).
+
+Categories: campus_offices, student_services, student_life.
+
+**School Calendar and Accreditation**
+
+- **School calendar:** The calendar link on the website points to a draft-preview address. Obtain the current approved calendar from the Registrar.
+- **Accredited programs:** The website has an Accredited Programs page. Record each program's accreditation level and validity period as officially published.
+
+Category: academic.
+
+### Priority 3 — Frequently Needed Information
+
+These topics are commonly needed by students and should be added after the Priority 1 and Priority 2 content.
+
+| Topic | What to collect | Category | Notes |
+|---|---|---|---|
+| Tuition and fees | Tuition and other school fees, and how free tuition applies, including what is covered and what is not. | enrollment | Responsible office to be confirmed. |
+| Online systems | Step-by-step guides for the online admission and enrollment system and the SEDI portal. | admission, enrollment | The website links a SEDI user manual. The portal's scope must be confirmed with the campus. |
+| Scholarships | Programs, eligibility, requirements, deadlines, and responsible office. | scholarships | The website's scholarship section holds only a 2022 post (see 8.9). Obtain current information from the scholarship office. |
+| Academic milestones | On-the-job training or internship rules, thesis or capstone guidelines, clearance, application for graduation, and graduation honors. | academic, document_requests | Sources include the Student Manual, college offices, and the Registrar. |
+| Safety and protection | GAD and harassment reporting procedures, campus security, emergency contacts, and how class suspensions are announced. | student_services | Contact numbers must be verified. The offline assistant can explain the announcement process but cannot know about same-day suspensions. |
+| Daily campus life | Wi-Fi access, library access and borrowing rules, student housing, and clinic services. | student_services, campus_facilities | Wi-Fi vouchers are issued through the MIS/MIST office. |
+
+**Local Practical Information (Optional)**
+
+Information such as how to get to Cabagan, boarding houses, and food options may help incoming students. It is unofficial and must not be included in the official knowledge pack. If it is added later, it must be a separate collection, clearly labeled as unofficial.
+
+## 8.8 Initial Knowledge Pack Scope (v0.1)
+
+The first knowledge pack should be limited to what is needed to prove that the retrieval and citation pipeline works (see Section 22):
+
+1. ISU Student Manual.
+2. Citizen's Charter (Cabagan Campus edition).
+3. A basic office list from Priority 2, with names, functions, and verified locations.
+4. The current approved school calendar.
+5. The curriculum and program information of one pilot college.
+
+The pilot college should be the one the project team can verify most directly with its own college office. CCSICT is the likely choice.
+
+The remaining colleges, the full campus directory, and the Priority 3 topics should be added in later knowledge-pack versions, following the expansion path in Section 23 (v0.3).
+
+## 8.9 Source Collection and Verification Workflow
+
+1. Request the ISU Student Manual and the Cabagan Citizen's Charter from the campus.
+2. For each office in 8.7, request its current official documents and forms, and confirm its services, requirements, hours, location, and contact details with the office.
+3. Transcribe image-only or scanned sources, then have a person check the transcription against the original. OCR output must not be published unchecked.
+4. Record the document metadata defined in 8.4, including the source and the last verified date.
+5. Obtain verification from the responsible office before an item is marked Verified (see 8.5).
+6. Confirm with the campus that the verified content may be distributed in the knowledge pack.
+
+### Known Source Limitations
+
+The following issues were observed on the official website in November 2026. They affect how the website can be used as a source.
+
+| Observation | Handling |
+|---|---|
+| The Program Offerings page is published as an image. | Transcribe manually and verify. Keep the image as the cited source. |
+| The Scholarship section contains a single post from 2022. | Do not treat it as current. Obtain current information from the scholarship office. |
+| The school calendar menu link points to a draft-preview address. | Obtain the approved calendar from the Registrar. |
+| Pages include menus, footers, and widgets that are not part of the main content, and some footer links are unrelated to the university. | Extract only the main content, sanitize it as described in 16.4, and inform the campus MIS office of the unrelated links. |
+
+Review this table whenever the knowledge pack is updated.
+
+## 8.10 Student Question Collection
+
+Before expanding the knowledge base beyond v0.1, collect 50–100 questions that students actually ask. Possible sources include classmates, student organizations, and public campus channels.
+
+Use the collected questions to:
+
+- Decide which documents to add next.
+- Seed the test dataset described in 20.2.
+
+Collection must be voluntary, and questions must be stored without personal identifiers.
+
 ---
 
 # 9. Offline-First Architecture
@@ -1361,6 +1495,8 @@ Tasks:
 - Identify target browsers and devices.
 - Collect available university information.
 - Identify approved information sources.
+- Request the ISU Student Manual and the Cabagan Citizen's Charter (see 8.7).
+- Collect 50–100 real student questions (see 8.10).
 - Evaluate model licensing.
 - Research WebLLM capabilities.
 - Benchmark compatible models.
@@ -1525,6 +1661,8 @@ Verify that:
 
 Prepare a test dataset of verified university questions.
 
+Seed the dataset with the real student questions collected in 8.10. An expected answer may only be added after it has been verified against an official source.
+
 Each question should have:
 
 - Question ID.
@@ -1612,7 +1750,7 @@ Required features:
 - Local model inference through WebLLM.
 - Local chat interface.
 - Basic conversation history.
-- Local university FAQ knowledge base.
+- Local university FAQ knowledge base (initial content defined in 8.8).
 - Keyword-based retrieval.
 - Basic RAG integration.
 - Source references.
