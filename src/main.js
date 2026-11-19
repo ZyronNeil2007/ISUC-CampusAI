@@ -24,6 +24,15 @@ defineRoute('/announcements', announcements);
 defineRoute('/about', about);
 defineRoute('/settings', settings);
 
+if (import.meta.env.DEV) {
+  // Dev-only handle for debugging and browser tests. Removed from production builds.
+  Promise.all([import('./ai/engine/ModelManager.js'), import('./ai/session.js')]).then(
+    ([{ modelManager }, { conversation }]) => {
+      window.__campusai = { modelManager, conversation };
+    }
+  );
+}
+
 onConnectivityChange((online) => shell.setOnline(online));
 startRouter(shell.outlet, (path) => shell.setActive(path));
 registerServiceWorker();

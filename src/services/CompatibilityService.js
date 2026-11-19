@@ -5,6 +5,7 @@
 export async function checkCompatibility() {
   const result = {
     webgpu: false,
+    shaderF16: false,
     webgpuReason: '',
     serviceWorker: 'serviceWorker' in navigator,
     indexedDB: 'indexedDB' in window,
@@ -20,6 +21,7 @@ export async function checkCompatibility() {
       const adapter = await navigator.gpu.requestAdapter();
       if (adapter) {
         result.webgpu = true;
+        result.shaderF16 = adapter.features?.has('shader-f16') ?? false;
       } else {
         result.webgpuReason = 'No compatible GPU adapter was found.';
       }

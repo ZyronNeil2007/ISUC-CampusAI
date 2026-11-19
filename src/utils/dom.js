@@ -8,6 +8,11 @@ export function escapeHtml(value) {
     .replaceAll("'", '&#39;');
 }
 
+/** Format a size given in megabytes, e.g. 700 -> "700 MB", 1800 -> "1.8 GB". */
+export function formatMB(mb) {
+  return mb >= 1000 ? `${(mb / 1000).toFixed(1)} GB` : `${Math.round(mb)} MB`;
+}
+
 /** Format a byte count for display. */
 export function formatBytes(bytes) {
   if (bytes == null || Number.isNaN(bytes)) return 'unknown';

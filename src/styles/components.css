@@ -165,3 +165,48 @@ select {
   background: var(--surface);
   min-height: 40px;
 }
+
+.btn-sm {
+  min-height: 36px;
+  padding: var(--space-2) var(--space-4);
+  font-size: 0.875rem;
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-soft);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  vertical-align: middle;
+}
+.badge[data-kind='ok'] {
+  color: var(--success);
+  border-color: var(--success);
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+progress {
+  width: 100%;
+  height: 10px;
+  accent-color: var(--primary);
+}
+
+.chip-list-center {
+  justify-content: center;
+  margin-bottom: var(--space-4);
+}

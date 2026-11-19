@@ -1,9 +1,14 @@
 import { getTheme, setTheme } from '../../services/ThemeService.js';
 import { checkCompatibility } from '../../services/CompatibilityService.js';
-import { formatBytes, escapeHtml } from '../../utils/dom.js';
+import { modelManager } from '../../ai/engine/ModelManager.js';
+import { MODEL_CATALOG, getModel, resolveVramMB } from '../../ai/engine/catalog.js';
+import { formatBytes, formatMB, escapeHtml } from '../../utils/dom.js';
+
+let unsubscribe = null;
 
 export default {
   title: 'Settings',
+
   render() {
     const theme = getTheme();
     const opt = (v, label) => `<option value="${v}"${theme === v ? ' selected' : ''}>${label}</option>`;
@@ -18,9 +23,6 @@ export default {
             </select>
           </div>
           <div class="setting-row">
-            <div><div class="label">AI model</div><div class="hint">Not installed. Model management arrives in Phase 3.</div></div>
-          </div>
-          <div class="setting-row">
             <div><div class="label">Knowledge pack</div><div class="hint">Not installed. Knowledge packs arrive in Phase 4.</div></div>
           </div>
           <div class="setting-row">
@@ -30,23 +32,107 @@ export default {
             <div><div class="label">Local storage</div><div class="hint" id="storage">Checking…</div></div>
           </div>
         </div>
+
+        <section class="section">
+          <h2>AI model</h2>
+          <p class="hint" id="model-state"></p>
+          <div class="settings-list" id="model-list">Loading models…</div>
+        </section>
+
         <section class="section">
           <h2>Privacy</h2>
           <p>CampusAI is designed to keep questions and conversation history on your device. It does not require an account or personal records. Local processing does not make a shared or compromised device safe, so avoid entering sensitive information on shared computers.</p>
         </section>
       </div>`;
   },
+
   mount(root) {
     root.querySelector('#theme-select').addEventListener('change', (e) => setTheme(e.target.value));
+
     checkCompatibility().then((c) => {
-      root.querySelector('#compat').innerHTML = escapeHtml(
-        c.webgpu ? 'WebGPU available. This device can likely run on-device AI.' : `WebGPU unavailable. ${c.webgpuReason}`
-      );
+      root.querySelector('#compat').textContent = c.webgpu
+        ? 'WebGPU available. This device can likely run on-device AI.'
+        : `WebGPU unavailable. ${c.webgpuReason}`;
       const s = c.storage;
       root.querySelector('#storage').textContent =
         s.quota == null
           ? 'Storage estimate not available in this browser.'
           : `${formatBytes(s.usage)} used of about ${formatBytes(s.quota)}. Persistent: ${s.persisted ? 'yes' : 'no'}.`;
     });
+
+    const list = root.querySelector('#model-list');
+    const stateEl = root.querySelector('#model-state');
+    let token = 0;
+    let prev = { status: null, modelKey: null };
+
+    async function renderList() {
+      const mine = ++token;
+      const compat = await modelManager.getCompat();
+      const downloaded = await Promise.all(MODEL_CATALOG.map((m) => modelManager.isCached(m.key)));
+      if (mine !== token) return; // a newer render superseded this one
+
+      const s = modelManager.state;
+      const busy = s.status === 'downloading' || s.status === 'loading';
+      list.innerHTML = MODEL_CATALOG.map((m, i) => {
+        const selected = m.key === s.modelKey;
+        const key = escapeHtml(m.key);
+        return `
+          <div class="setting-row">
+            <div>
+              <div class="label">${escapeHtml(m.name)}
+                ${selected ? '<span class="badge" data-kind="ok">In use</span>' : ''}
+                ${downloaded[i] ? '<span class="badge">Downloaded</span>' : ''}
+              </div>
+              <div class="hint">${escapeHtml(m.note)} Download about ${formatMB(m.approxDownloadMB)} (estimate) · GPU memory about ${formatMB(resolveVramMB(m, compat.shaderF16))} · License: ${escapeHtml(m.license)}.${m.licenseNote ? ` ${escapeHtml(m.licenseNote)}` : ''}</div>
+            </div>
+            <div class="row-actions">
+              ${selected ? '' : `<button class="btn btn-sm" type="button" data-action="select" data-key="${key}"${busy ? ' disabled' : ''}>Use this model</button>`}
+              ${downloaded[i] ? `<button class="btn btn-sm" type="button" data-action="remove" data-key="${key}"${selected && busy ? ' disabled' : ''}>Remove download</button>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function renderState(s) {
+      const m = getModel(s.modelKey);
+      const text = {
+        idle: 'not loaded',
+        downloading: `downloading ${Math.round(s.progress * 100)}%`,
+        loading: 'loading…',
+        ready: 'ready',
+        error: s.error ?? 'error',
+      }[s.status];
+      stateEl.innerHTML =
+        `Selected: ${escapeHtml(m.name)} · ${escapeHtml(text)}.` +
+        (s.status === 'ready' ? '' : ' <a href="#/assistant">Open the AI Assistant</a> to download or load it.');
+    }
+
+    list.addEventListener('click', async (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const key = btn.dataset.key;
+      if (btn.dataset.action === 'select') {
+        modelManager.select(key);
+      } else if (btn.dataset.action === 'remove') {
+        const m = getModel(key);
+        if (!window.confirm(`Remove the downloaded files for ${m.name}? You will need to download it again to use it offline.`)) return;
+        await modelManager.remove(key);
+        renderList();
+      }
+    });
+
+    unsubscribe = modelManager.subscribe((s) => {
+      renderState(s);
+      // Re-render the rows only when something structural changed, not on every progress tick.
+      if (s.status !== prev.status || s.modelKey !== prev.modelKey) {
+        prev = { status: s.status, modelKey: s.modelKey };
+        renderList();
+      }
+    });
+  },
+
+  unmount() {
+    unsubscribe?.();
+    unsubscribe = null;
   },
 };
