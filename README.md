@@ -1608,15 +1608,15 @@ Development should proceed incrementally.
 
 Tasks:
 
-- [ ] Finalize project requirements.
-- [ ] Identify target browsers and devices.
-- [ ] Collect available university information.
-- [ ] Identify approved information sources.
-- [ ] Request the ISU Student Manual and the Cabagan Citizen's Charter (see 8.7).
-- [ ] Collect 50–100 real student questions (see 8.10).
-- [ ] Evaluate model licensing.
-- [ ] Research WebLLM capabilities.
-- [ ] Benchmark compatible models.
+- [x] Finalize project requirements.
+- [x] Identify target browsers and devices.
+- [x] Collect available university information.
+- [x] Identify approved information sources.
+- [x] Request the ISU Student Manual and the Cabagan Citizen's Charter (see 8.7).
+- [x] Collect 50–100 real student questions (see 8.10).
+- [x] Evaluate model licensing.
+- [x] Research WebLLM capabilities.
+- [x] Benchmark compatible models.
 - [ ] Prepare initial design system.
 
 Deliverables:
@@ -1630,14 +1630,14 @@ Deliverables:
 
 Tasks:
 
-- [ ] Set up Vite.
-- [ ] Establish project folder structure.
-- [ ] Create responsive layout.
-- [ ] Implement homepage.
-- [ ] Implement AI assistant interface.
-- [ ] Create settings page.
-- [ ] Add light and dark themes.
-- [ ] Implement PWA configuration.
+- [x] Set up Vite.
+- [x] Establish project folder structure.
+- [x] Create responsive layout.
+- [x] Implement homepage.
+- [x] Implement AI assistant interface.
+- [x] Create settings page.
+- [x] Add light and dark themes.
+- [x] Implement PWA configuration.
 
 Deliverables:
 
@@ -1649,14 +1649,14 @@ Deliverables:
 
 Tasks:
 
-- [ ] Integrate WebLLM.
-- [ ] Implement model manager.
-- [ ] Implement model selection.
-- [ ] Add download progress.
-- [ ] Add model initialization.
-- [ ] Implement local inference.
-- [ ] Add generation controls.
-- [ ] Test without internet.
+- [x] Integrate WebLLM.
+- [x] Implement model manager.
+- [x] Implement model selection.
+- [x] Add download progress.
+- [x] Add model initialization.
+- [x] Implement local inference.
+- [x] Add generation controls.
+- [x] Test without internet.
 
 Deliverables:
 
