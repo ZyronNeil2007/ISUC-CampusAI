@@ -1608,16 +1608,16 @@ Development should proceed incrementally.
 
 Tasks:
 
-- Finalize project requirements.
-- Identify target browsers and devices.
-- Collect available university information.
-- Identify approved information sources.
-- Request the ISU Student Manual and the Cabagan Citizen's Charter (see 8.7).
-- Collect 50–100 real student questions (see 8.10).
-- Evaluate model licensing.
-- Research WebLLM capabilities.
-- Benchmark compatible models.
-- Prepare initial design system.
+- [ ] Finalize project requirements.
+- [ ] Identify target browsers and devices.
+- [ ] Collect available university information.
+- [ ] Identify approved information sources.
+- [ ] Request the ISU Student Manual and the Cabagan Citizen's Charter (see 8.7).
+- [ ] Collect 50–100 real student questions (see 8.10).
+- [ ] Evaluate model licensing.
+- [ ] Research WebLLM capabilities.
+- [ ] Benchmark compatible models.
+- [ ] Prepare initial design system.
 
 Deliverables:
 
@@ -1630,14 +1630,14 @@ Deliverables:
 
 Tasks:
 
-- Set up Vite.
-- Establish project folder structure.
-- Create responsive layout.
-- Implement homepage.
-- Implement AI assistant interface.
-- Create settings page.
-- Add light and dark themes.
-- Implement PWA configuration.
+- [ ] Set up Vite.
+- [ ] Establish project folder structure.
+- [ ] Create responsive layout.
+- [ ] Implement homepage.
+- [ ] Implement AI assistant interface.
+- [ ] Create settings page.
+- [ ] Add light and dark themes.
+- [ ] Implement PWA configuration.
 
 Deliverables:
 
@@ -1649,14 +1649,14 @@ Deliverables:
 
 Tasks:
 
-- Integrate WebLLM.
-- Implement model manager.
-- Implement model selection.
-- Add download progress.
-- Add model initialization.
-- Implement local inference.
-- Add generation controls.
-- Test without internet.
+- [ ] Integrate WebLLM.
+- [ ] Implement model manager.
+- [ ] Implement model selection.
+- [ ] Add download progress.
+- [ ] Add model initialization.
+- [ ] Implement local inference.
+- [ ] Add generation controls.
+- [ ] Test without internet.
 
 Deliverables:
 
@@ -1668,15 +1668,15 @@ Deliverables:
 
 Tasks:
 
-- Collect approved documents.
-- Extract document text.
-- Implement text chunking.
-- Store document metadata.
-- Implement local keyword search.
-- Add BM25 retrieval.
-- Integrate retrieved context into prompts.
-- Implement source citations.
-- Evaluate retrieval quality.
+- [ ] Collect approved documents.
+- [ ] Extract document text.
+- [ ] Implement text chunking.
+- [ ] Store document metadata.
+- [ ] Implement local keyword search.
+- [ ] Add BM25 retrieval.
+- [ ] Integrate retrieved context into prompts.
+- [ ] Implement source citations.
+- [ ] Evaluate retrieval quality.
 
 Deliverables:
 
@@ -1688,14 +1688,14 @@ Deliverables:
 
 Tasks:
 
-- Develop academic assistance.
-- Develop admission and enrollment guidance.
-- Develop office directory.
-- Develop campus map.
-- Develop scholarship information.
-- Develop student-life information.
-- Develop announcements.
-- Develop document request guides.
+- [ ] Develop academic assistance.
+- [ ] Develop admission and enrollment guidance.
+- [ ] Develop office directory.
+- [ ] Develop campus map.
+- [ ] Develop scholarship information.
+- [ ] Develop student-life information.
+- [ ] Develop announcements.
+- [ ] Develop document request guides.
 
 Deliverables:
 
@@ -1705,14 +1705,14 @@ Deliverables:
 
 Tasks:
 
-- Implement IndexedDB.
-- Implement local model storage.
-- Implement knowledge-pack installation.
-- Implement version checking.
-- Implement package validation.
-- Implement knowledge-pack signature verification (see 16.7).
-- Implement persistent storage requests.
-- Implement recovery and re-download workflows.
+- [ ] Implement IndexedDB.
+- [ ] Implement local model storage.
+- [ ] Implement knowledge-pack installation.
+- [ ] Implement version checking.
+- [ ] Implement package validation.
+- [ ] Implement knowledge-pack signature verification (see 16.7).
+- [ ] Implement persistent storage requests.
+- [ ] Implement recovery and re-download workflows.
 
 Deliverables:
 
@@ -1723,15 +1723,15 @@ Deliverables:
 
 Tasks:
 
-- Test model compatibility.
-- Test offline functionality.
-- Evaluate AI accuracy.
-- Evaluate document retrieval.
-- Test source citations.
-- Measure response latency.
-- Measure storage and memory usage.
-- Conduct student usability testing.
-- Fix identified problems.
+- [ ] Test model compatibility.
+- [ ] Test offline functionality.
+- [ ] Evaluate AI accuracy.
+- [ ] Evaluate document retrieval.
+- [ ] Test source citations.
+- [ ] Measure response latency.
+- [ ] Measure storage and memory usage.
+- [ ] Conduct student usability testing.
+- [ ] Fix identified problems.
 
 Deliverables:
 
@@ -1743,12 +1743,12 @@ Deliverables:
 
 Tasks:
 
-- Finalize documentation.
-- Prepare deployment.
-- Prepare demonstration scenarios.
-- Prepare research presentation.
-- Document limitations.
-- Prepare future development recommendations.
+- [ ] Finalize documentation.
+- [ ] Prepare deployment.
+- [ ] Prepare demonstration scenarios.
+- [ ] Prepare research presentation.
+- [ ] Document limitations.
+- [ ] Prepare future development recommendations.
 
 Deliverables:
 
