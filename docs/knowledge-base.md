@@ -80,3 +80,30 @@ How to read this:
 * PDF extraction was tested on synthetic PDFs, not on real university files; tables are not reconstructed and
   scanned pages need OCR, which is not done.
 * Filipino and regional-language support is minimal.
+
+## Converting the Citizen's Charter (`tools/charter/charter_to_draft.py`)
+
+The ISU Citizen's Charter 2026 (1st Edition) is a long run of near-identical service pages (requirements, steps, fees,
+processing time). The generic extractor cannot rebuild those tables, so there is a one-off converter that reads them with
+`pdfplumber` (`pip install pdfplumber`):
+
+```
+python3 tools/charter/charter_to_draft.py path/to/charter.pdf --external-only
+```
+
+It writes one DRAFT Markdown file per office and service kind into `knowledge/_drafts/charter/` (git-ignored). The
+drafts keep `reviewRequired: true` and `TODO` fields, so `npm run pack` refuses them until a person has compared them with
+the PDF. Choices that matter:
+
+- **Staff names are left out.** The "with names" edition lists employees per service. They are personal data and are not
+  needed to answer a student's question.
+- **Continuation rows are flagged.** Tables that continue on the next page are merged, with a "check" comment.
+- **Completeness report.** `_conversion-report.json` lists numbers, fees and times found in a service's PDF text that are
+  missing from the draft. On the 2026 edition only one internal procurement service is flagged.
+- **Internal services** (for employees) are written too, unless `--external-only` is given. Student-facing packs
+  need only the external ones.
+- It is not covered by `npm test` (it needs Python and a real PDF), so treat its output as a draft.
+
+What a reviewer must still confirm: fees and processing times, requirement lists, step order, the publication date (the
+file name's "Mar30-2026" may be an upload date), and **which campus** the Charter's offices and processing times describe.
+The PDF is the university-wide charter and names Cabagan only in its history section.
