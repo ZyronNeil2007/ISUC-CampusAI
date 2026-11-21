@@ -1,0 +1,11 @@
+id: sample-office-directory
+title: Sample Office Directory
+category: campus_offices
+office: Sample University Administration
+version: "1.0"
+publishedAt: 2026-08-01
+effectiveAt: 2026-08-01
+verificationStatus: draft
+source: Sample University Campus Directory (fictional)
+sample: true
+tags: [offices, contact, hours, location]

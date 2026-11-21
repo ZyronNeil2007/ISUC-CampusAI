@@ -1,15 +1,29 @@
 import { modelManager } from '../../ai/engine/ModelManager.js';
 import { MODEL_CATALOG, getModel, resolveVramMB } from '../../ai/engine/catalog.js';
-import { conversation } from '../../ai/session.js';
+import { conversation, knowledgePack } from '../../ai/session.js';
+import { WARNING_TEXT } from '../../ai/generation/CitationManager.js';
 import { getQueryParam } from '../../app/router.js';
 import { escapeHtml, formatMB } from '../../utils/dom.js';
 
-const EXAMPLES = [
-  'What is a prerequisite subject?',
-  'What is object-oriented programming?',
-  'Explain what a thesis is.',
-  "Where is the Registrar's Office?",
-];
+// Shown when no knowledge pack is loaded (or it has no starter questions): general questions only.
+const GENERAL_EXAMPLES = ['What is a prerequisite subject?', 'What is object-oriented programming?', 'Explain what a thesis is.'];
+
+/** What the student should know about the content behind the answers (README 8.9: say what is and is not verified). */
+function packNotice(state) {
+  const info = state.info;
+  if (state.status === 'loading' || state.status === 'idle') return { kind: 'info', text: 'Loading the campus knowledge pack…' };
+  if (state.status === 'error') return { kind: 'error', text: `${state.error} CampusAI will not answer campus-specific questions without a verified knowledge pack.` };
+  if (state.status === 'none') {
+    return { kind: 'warn', text: 'No campus knowledge pack is installed, so CampusAI cannot confirm ISU-specific facts. General questions still work. Confirm campus details with the responsible office.' };
+  }
+  if (info.contentLevel === 'sample') {
+    return { kind: 'warn', text: `Sample content: this knowledge pack is FICTIONAL test material, not real ISU information. Pack: ${info.campus}.` };
+  }
+  if (info.contentLevel === 'draft') {
+    return { kind: 'warn', text: 'Draft content: these documents have not been verified by the university. Do not rely on them; confirm with the responsible office.' };
+  }
+  return null;
+}
 
 let cleanup = [];
 
@@ -20,10 +34,6 @@ export default {
     const options = MODEL_CATALOG.map(
       (m) => `<option value="${escapeHtml(m.key)}">${escapeHtml(m.name)} (about ${formatMB(m.approxDownloadMB)})</option>`
     ).join('');
-    const chips = EXAMPLES.map(
-      (q) => `<button type="button" class="chip" data-example="${escapeHtml(q)}">${escapeHtml(q)}</button>`
-    ).join('');
-
     return `
       <div class="chat-layout">
         <aside class="chat-sidebar" id="chat-sidebar" aria-label="Conversation history">
@@ -57,15 +67,14 @@ export default {
             <button class="btn btn-primary" type="button" id="model-action" disabled>Checking device…</button>
           </div>
 
+          <div class="pack-banner" id="pack-banner" role="status" hidden></div>
+
           <div class="chat-messages" id="chat-messages" role="log" aria-live="polite" aria-label="Conversation">
             <div class="chat-empty" id="chat-empty">
               <h2>Ask CampusAI</h2>
               <p id="empty-text"></p>
-              <div class="chip-list chip-list-center">${chips}</div>
-              <div class="notice">
-                CampusAI cannot confirm ISU-specific facts yet. The verified knowledge base arrives in a later phase,
-                so treat any ISU-specific answer as unverified and confirm it with the responsible office.
-              </div>
+              <div class="chip-list chip-list-center" id="examples"></div>
+              <div class="notice" id="pack-notice" role="status"></div>
             </div>
           </div>
 
@@ -101,6 +110,9 @@ export default {
       list: $('#chat-messages'),
       empty: $('#chat-empty'),
       emptyText: $('#empty-text'),
+      examples: $('#examples'),
+      packNotice: $('#pack-notice'),
+      packBanner: $('#pack-banner'),
       composer: $('#composer'),
       prompt: $('#prompt'),
       send: $('#send'),
@@ -111,6 +123,7 @@ export default {
     let cached = false; // is the selected model already downloaded?
     let model = modelManager.state;
     let chat = { messages: conversation.messages, busy: conversation.busy };
+    let pack = knowledgePack.state;
     const rendered = new Map(); // message id -> view
 
     const on = (target, type, handler) => {
@@ -199,6 +212,37 @@ export default {
         : 'Set up the model above, then ask your question.';
     }
 
+    /* ---------- knowledge pack ---------- */
+
+    function renderPack() {
+      const notice = packNotice(pack);
+      el.packNotice.hidden = !notice;
+      if (notice) {
+        el.packNotice.textContent = notice.text;
+        el.packNotice.dataset.kind = notice.kind === 'error' ? 'error' : notice.kind === 'info' ? 'ok' : 'warn';
+      }
+      // Once the conversation has started the empty state is gone, so keep the warning visible above the messages.
+      const sticky = notice && notice.kind !== 'info' && pack.status !== 'none';
+      el.packBanner.hidden = !sticky || chat.messages.length === 0;
+      el.packBanner.textContent = sticky ? notice.text : '';
+
+      const questions = pack.status === 'ready' && pack.info.starterQuestions.length ? pack.info.starterQuestions : GENERAL_EXAMPLES;
+      const key = questions.join('\n');
+      if (el.examples.dataset.key !== key) {
+        el.examples.dataset.key = key;
+        el.examples.replaceChildren(
+          ...questions.map((q) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'chip';
+            b.dataset.example = q;
+            b.textContent = q;
+            return b;
+          })
+        );
+      }
+    }
+
     async function refreshCached() {
       cached = await modelManager.isCached(modelManager.state.modelKey);
       renderSetup();
@@ -215,6 +259,68 @@ export default {
       return b;
     }
 
+    /** Source cards: every piece of text is set with textContent, so nothing from a document or the model is parsed as HTML. */
+    function renderSources(view, m) {
+      const sources = m.sources ?? [];
+      const key = sources.map((x) => `${x.chunkId}:${x.cited}`).join('|');
+      if (key === view.sourcesKey) return;
+      view.sourcesKey = key;
+      view.sources.hidden = sources.length === 0;
+      if (!sources.length) {
+        view.sources.replaceChildren();
+        return;
+      }
+      const anyCited = sources.some((x) => x.cited);
+      const heading = document.createElement('div');
+      heading.className = 'sources-heading';
+      heading.textContent = m.route === 'refuse' ? 'Related office or document' : anyCited ? 'Sources' : 'Sources consulted (not cited inline)';
+
+      const makeCard = (src) => {
+        const card = document.createElement('details');
+        card.className = 'source-card';
+        const summary = document.createElement('summary');
+        if (src.id) {
+          const id = document.createElement('span');
+          id.className = 'source-id';
+          id.textContent = src.id;
+          summary.append(id);
+        }
+        const title = document.createElement('span');
+        title.className = 'source-title';
+        title.textContent = [src.title, src.section].filter(Boolean).join(' › ');
+        summary.append(title);
+        if (src.cited) {
+          const badge = document.createElement('span');
+          badge.className = 'badge';
+          badge.dataset.kind = 'ok';
+          badge.textContent = 'cited';
+          summary.append(badge);
+        }
+        const meta = document.createElement('div');
+        meta.className = 'source-meta';
+        meta.textContent = [src.office, src.page ? `page ${src.page}` : null, src.version ? `version ${src.version}` : null, src.publishedAt ? `published ${src.publishedAt}` : null].filter(Boolean).join(' · ');
+        const excerpt = document.createElement('div');
+        excerpt.className = 'source-excerpt';
+        excerpt.textContent = src.excerpt;
+        card.append(summary, meta, excerpt);
+        return card;
+      };
+
+      // When the answer cites some sources, show those first and fold the other passages that were consulted away.
+      const shown = anyCited ? sources.filter((x) => x.cited) : sources;
+      const others = anyCited ? sources.filter((x) => !x.cited) : [];
+      const children = [heading, ...shown.map(makeCard)];
+      if (others.length) {
+        const more = document.createElement('details');
+        more.className = 'sources-more';
+        const label = document.createElement('summary');
+        label.textContent = `Also consulted (${others.length})`;
+        more.append(label, ...others.map(makeCard));
+        children.push(more);
+      }
+      view.sources.replaceChildren(...children);
+    }
+
     function createMessage(m) {
       const wrap = document.createElement('div');
       wrap.className = `msg-wrap msg-wrap-${m.role}`;
@@ -224,6 +330,12 @@ export default {
       const view = { root: wrap, body, m };
 
       if (m.role === 'assistant') {
+        view.label = document.createElement('div');
+        view.label.className = 'msg-label';
+        body.before(view.label);
+        view.sources = document.createElement('div');
+        view.sources.className = 'sources';
+        view.sourcesKey = '';
         view.note = document.createElement('div');
         view.note.className = 'msg-note';
         view.actions = document.createElement('div');
@@ -241,7 +353,7 @@ export default {
         });
         view.regen = makeButton('Regenerate', () => conversation.regenerate());
         view.actions.append(view.copy, view.regen);
-        wrap.append(view.note, view.actions);
+        wrap.append(view.sources, view.note, view.actions);
       }
       return view;
     }
@@ -256,8 +368,13 @@ export default {
       if (m.role !== 'assistant') return;
 
       view.body.hidden = !m.content && !waiting;
+      // The label says when an answer is NOT from university documents (README 15.2).
+      view.label.textContent = m.label ?? '';
+      view.label.hidden = !m.label;
+      renderSources(view, m);
       const notes = [];
       if (m.error) notes.push(`Something went wrong: ${m.error}`);
+      for (const w of m.warnings ?? []) if (WARNING_TEXT[w]) notes.push(WARNING_TEXT[w]);
       if (m.stopped) notes.push('Stopped.');
       if (m.truncated) notes.push('Reached the length limit. Ask me to continue.');
       view.note.textContent = notes.join(' ');
@@ -393,6 +510,13 @@ export default {
         chat = { messages, busy };
         renderMessages();
         renderComposer();
+        renderPack();
+      })
+    );
+    cleanup.push(
+      knowledgePack.subscribe((state) => {
+        pack = state;
+        renderPack();
       })
     );
 

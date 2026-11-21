@@ -1,0 +1,69 @@
+# Lexicon for the ISU Cabagan pack. It helps CampusAI understand how students write; it never produces answers.
+#
+# RULES
+#  - Add a phrase only when you have seen students use it. Collect them from real questions (README 8.10).
+#  - Acronyms below are listed as campus TERMS only. Do not add an expansion (an alias) until the campus confirms what
+#    the acronym stands for: the README list (8.7) is a collection checklist, not verified content.
+#  - There are NO starterQuestions yet. Add one only after a verified document answers it
+#    (`npm run eval` checks that every starter question is answerable).
+
+aliases:
+  # Generic Philippine school terms (not ISU facts).
+  - [tor, transcript of records]
+  - [cor, certificate of registration]
+  - [coe, certificate of enrollment]
+  - [cog, certificate of grades]
+  - [gwa, general weighted average]
+  - [ojt, on-the-job training, internship, practicum]
+  - [loa, leave of absence]
+  - [good moral, certificate of good moral character]
+  - [enroll, register]
+  - [deadline, due date, last day, closing date, cutoff]
+  - [fee, cost, price]
+  - [representative, someone else, authorized person, on my behalf]
+  # Filipino. Extend with the words students really use.
+  - [bayad, fee, payment]
+  - [pagpapatala, enrollment]
+  - [iskolarsip, scholarship]
+  - [aklatan, library]
+
+campusNames:
+  - isu
+  - isabela state university
+  - cabagan
+
+campusTerms:
+  - university
+  - campus
+  - college
+  - dean
+  - registrar
+  - enrollment
+  - enroll
+  - admission
+  - scholarship
+  - tuition
+  - semester
+  - curriculum
+  - subject
+  - adviser
+  - clearance
+  - cashier
+  - library
+  - clinic
+  - guidance
+  - transcript
+  - certificate
+  - graduation
+  - student manual
+  - citizen's charter
+  # Colleges and offices named in README 8.7 (acronyms only; expansions are NOT confirmed here).
+  - ccje
+  - ccsict
+  - cdcas
+  - cfem
+  - cbm
+  - osas
+  - gad
+
+starterQuestions: []

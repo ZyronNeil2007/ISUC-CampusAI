@@ -6,14 +6,25 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:sample": "node tools/build-knowledge-pack.mjs --sample && vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node --test \"tests/**/*.test.mjs\""
+    "pack": "node tools/build-knowledge-pack.mjs",
+    "pack:sample": "node tools/build-knowledge-pack.mjs --sample",
+    "pack:draft": "node tools/build-knowledge-pack.mjs --include-drafts",
+    "pack:check": "node tools/build-knowledge-pack.mjs --check",
+    "test": "node --test \"tests/**/*.test.mjs\"",
+    "eval": "node tools/eval-retrieval.mjs",
+    "extract": "node tools/extract-text.mjs"
   },
   "devDependencies": {
-    "vite": "^6.0.0"
+    "node-html-parser": "^9.0.7",
+    "pdfjs-dist": "^6.5.438",
+    "vite": "^6.0.0",
+    "yaml": "^2.9.1"
   },
   "dependencies": {
-    "@mlc-ai/web-llm": "^0.2.89"
+    "@mlc-ai/web-llm": "^0.2.89",
+    "stemmer": "^2.0.1"
   }
 }

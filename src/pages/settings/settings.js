@@ -1,10 +1,25 @@
 import { getTheme, setTheme } from '../../services/ThemeService.js';
 import { checkCompatibility } from '../../services/CompatibilityService.js';
 import { modelManager } from '../../ai/engine/ModelManager.js';
+import { knowledgePack } from '../../ai/session.js';
 import { MODEL_CATALOG, getModel, resolveVramMB } from '../../ai/engine/catalog.js';
 import { formatBytes, formatMB, escapeHtml } from '../../utils/dom.js';
 
 let unsubscribe = null;
+let unsubscribePack = null;
+
+const LEVEL_TEXT = {
+  sample: 'Sample content (fictional, for testing only)',
+  draft: 'Draft content (not verified by the university)',
+  official: 'Verified content',
+};
+const VALIDITY_TEXT = {
+  superseded: 'replaced by a newer document',
+  expired: 'expired',
+  'not-yet-effective': 'not in effect yet',
+  archived: 'archived',
+  unverified: 'not verified',
+};
 
 export default {
   title: 'Settings',
@@ -23,7 +38,11 @@ export default {
             </select>
           </div>
           <div class="setting-row">
-            <div><div class="label">Knowledge pack</div><div class="hint">Not installed. Knowledge packs arrive in Phase 4.</div></div>
+            <div>
+              <div class="label">Knowledge pack <span class="badge" id="pack-badge" hidden></span></div>
+              <div class="hint" id="pack-state">Checking…</div>
+              <div class="hint" id="pack-detail" hidden></div>
+            </div>
           </div>
           <div class="setting-row">
             <div><div class="label">Device compatibility</div><div class="hint" id="compat">Checking…</div></div>
@@ -48,6 +67,32 @@ export default {
 
   mount(root) {
     root.querySelector('#theme-select').addEventListener('change', (e) => setTheme(e.target.value));
+
+    const packState = root.querySelector('#pack-state');
+    const packDetail = root.querySelector('#pack-detail');
+    const packBadge = root.querySelector('#pack-badge');
+    unsubscribePack = knowledgePack.subscribe((s) => {
+      // textContent only: pack metadata is data, not markup.
+      packBadge.hidden = s.status !== 'ready';
+      packDetail.hidden = s.status !== 'ready';
+      if (s.status === 'ready') {
+        const i = s.info;
+        packBadge.textContent = i.contentLevel;
+        packBadge.dataset.kind = i.contentLevel === 'official' ? 'ok' : '';
+        packState.textContent = `${i.campus} · version ${i.packVersion} · ${i.documentCount} documents, ${i.chunkCount} passages. ${LEVEL_TEXT[i.contentLevel] ?? i.contentLevel}.`;
+        const unusable = i.unusable.map((u) => `"${u.title}" (${VALIDITY_TEXT[u.validity] ?? u.validity})`);
+        packDetail.textContent =
+          `Files checked against their SHA-256 hashes. ${i.signed ? 'Signed.' : 'Not signed: signature checks arrive in a later phase, so this proves the files are intact, not who published them.'}` +
+          ` Built ${i.createdAt}.${i.publishedAt ? ` Published ${i.publishedAt}.` : ' Not published.'}` +
+          (unusable.length ? ` Not used for answers: ${unusable.join('; ')}.` : '');
+      } else if (s.status === 'none') {
+        packState.textContent = 'No knowledge pack is installed. CampusAI will not answer campus-specific questions.';
+      } else if (s.status === 'error') {
+        packState.textContent = `${s.error} The pack is not being used.`;
+      } else {
+        packState.textContent = 'Loading…';
+      }
+    });
 
     checkCompatibility().then((c) => {
       root.querySelector('#compat').textContent = c.webgpu
@@ -134,5 +179,7 @@ export default {
   unmount() {
     unsubscribe?.();
     unsubscribe = null;
+    unsubscribePack?.();
+    unsubscribePack = null;
   },
 };

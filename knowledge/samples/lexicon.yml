@@ -1,0 +1,116 @@
+# Lexicon for the SAMPLE pack (fictional campus).
+#
+# The lexicon helps CampusAI understand how students write. It never produces answers:
+#   aliases          groups of phrases that mean the same thing. If a question contains one phrase, the others are
+#                    searched too (at a lower weight), so "TOR" also finds "Transcript of Records".
+#   campusNames      the campus's own names. A question that uses one is clearly about the campus.
+#   campusTerms      words that signal a university question. If a question uses them and no verified source matches,
+#                    CampusAI says it could not verify the answer instead of improvising.
+#   starterQuestions example questions shown to students. Each must be answerable from the pack
+#                    (tools/eval-retrieval.mjs checks this).
+
+aliases:
+  - [tor, transcript of records, transcript]
+  - [cor, certificate of registration]
+  - [coe, certificate of enrollment]
+  - [cog, certificate of grades]
+  - [good moral, certificate of good moral character]
+  - [gwa, general weighted average]
+  - [ojt, on-the-job training, internship, practicum]
+  - [loa, leave of absence]
+  - [suat, sample university admission test, admission test, entrance exam, entrance test]
+  - [osa, office of student affairs]
+  - [bsit, bs information technology, bachelor of science in information technology]
+  - [enroll, register]
+  - [shift, change program, change course]
+  - [drop subject, withdraw subject]
+  - [scholarship, grant]
+  - [deadline, due date, last day, closing date, cutoff, application period]
+  - [representative, someone else, authorized person, on my behalf]
+  - [fee, cost, price]
+  - [midterm, mid term]
+  - [sem, semester]
+  - [org, organization, student organization]
+  - [freshman, freshmen, new student, incoming student, first year student]
+  - [wifi, internet]
+  # Filipino terms. The team must extend this list with the words students really use.
+  - [bayad, fee, payment]
+  - [pagpapatala, enrollment]
+  - [iskolarsip, scholarship]
+  - [aklatan, library]
+  - [libro, book]
+  - [marka, grade]
+
+campusNames:
+  - sample university
+  - sample
+
+campusTerms:
+  - university
+  - campus
+  - college
+  - dean
+  - registrar
+  - enrollment
+  - enroll
+  - admission
+  - scholarship
+  - scholar
+  - tuition
+  - fee
+  - semester
+  - curriculum
+  - subject
+  - unit
+  - grade
+  - gwa
+  - adviser
+  - clearance
+  - cashier
+  - library
+  - clinic
+  - guidance
+  - counseling
+  - organization
+  - student affairs
+  - osa
+  - suat
+  - cor
+  - tor
+  - transcript
+  - certificate
+  - voucher
+  - ojt
+  - capstone
+  - calendar
+  - midterm
+  - final exam
+  - graduation
+  - shifting
+  - leave of absence
+  - office
+  - student id
+  - school id
+  - wifi
+  - dormitory
+  - housing
+  - canteen
+  - cafeteria
+  - parking
+  - gym
+  - uniform
+  - bookstore
+  - faculty
+  - professor
+  - instructor
+  - degree
+  - program
+  - course
+
+starterQuestions:
+  - What are the requirements for new freshmen?
+  - How do I request a Transcript of Records?
+  - When are the final examinations?
+  - What scholarships are available?
+  - How do I replace a lost student ID?
+  - What are the library opening hours?

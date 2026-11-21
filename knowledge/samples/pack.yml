@@ -1,0 +1,6 @@
+# Pack settings for the SAMPLE knowledge pack.
+# Everything in this folder is fictional. It exists to test CampusAI's retrieval and citations
+# and must never be presented as real Isabela State University information.
+campus: Sample University (fictional test content)
+packVersion: 0.1.0
+minAppVersion: 0.1.0

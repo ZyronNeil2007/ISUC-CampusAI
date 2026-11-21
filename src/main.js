@@ -7,6 +7,7 @@ import './styles/chat.css';
 import { renderShell } from './components/layout/Shell.js';
 import { defineRoute, startRouter } from './app/router.js';
 import { registerServiceWorker, onConnectivityChange } from './services/OfflineService.js';
+import { knowledgePack } from './ai/session.js';
 
 import home from './pages/home/home.js';
 import assistant from './pages/assistant/assistant.js';
@@ -28,10 +29,13 @@ if (import.meta.env.DEV) {
   // Dev-only handle for debugging and browser tests. Removed from production builds.
   Promise.all([import('./ai/engine/ModelManager.js'), import('./ai/session.js')]).then(
     ([{ modelManager }, { conversation }]) => {
-      window.__campusai = { modelManager, conversation };
+      window.__campusai = { modelManager, conversation, knowledgePack };
     }
   );
 }
+
+// Load the knowledge pack in the background. The app works without one; it then declines campus-specific questions.
+knowledgePack.load();
 
 onConnectivityChange((online) => shell.setOnline(online));
 startRouter(shell.outlet, (path) => shell.setActive(path));

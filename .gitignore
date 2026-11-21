@@ -4,3 +4,7 @@ dist/
 *.log
 .env
 .env.*
+
+# Generated knowledge pack (build it with npm run pack / pack:sample) and unreviewed extraction output
+public/knowledge-pack/
+knowledge/_drafts/
