@@ -130,3 +130,28 @@ test('an official pack does not use unverified documents', async () => {
   assert.equal(service.current.retriever.allowUnverified, false);
   assert.equal(service.current.retriever.retrieve('What scholarships are available?').strong, false);
 });
+
+/* ---------- campus map ---------- */
+
+test('the map is loaded with the pack and hash-checked like every other file', async () => {
+  const pack = await samplePack();
+  const loaded = await fetchPack({ base: BASE, fetchImpl: packFetch(pack) });
+  assert.equal(loaded.map.buildings.length, 5);
+
+  const tampered = pack.files.find((f) => f.path === 'metadata/map.json').content.replace('Library Building', 'Library Buildinx');
+  await expectPackError(fetchPack({ base: BASE, fetchImpl: packFetch(pack, { overrides: { 'metadata/map.json': tampered } }) }), /integrity check \(metadata\/map\.json\)/);
+});
+
+test('a pack that lists a map but does not serve it is incomplete', async () => {
+  const pack = await samplePack();
+  await expectPackError(fetchPack({ base: BASE, fetchImpl: packFetch(pack, { overrides: { 'metadata/map.json': null } }) }), /incomplete/, 'unavailable');
+});
+
+test('the service exposes the map, and documents and chunks, for the campus pages', async () => {
+  const pack = await samplePack();
+  const service = new KnowledgePackService({ base: BASE, fetchImpl: packFetch(pack), now: () => TODAY });
+  await service.load();
+  assert.equal(service.current.map.title, 'Sample University campus (fictional schematic)');
+  assert.equal(service.current.documents.length, pack.documents.length);
+  assert.equal(service.current.chunks.length, pack.chunks.length);
+});

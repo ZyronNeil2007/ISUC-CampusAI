@@ -1,5 +1,5 @@
 import { APP_VERSION } from '../app/version.js';
-import { PACK_FILES, supportsAppVersion, validateManifest, validatePackContents } from '../ai/retrieval/packFormat.js';
+import { OPTIONAL_PACK_FILES, PACK_FILES, supportsAppVersion, validateManifest, validatePackContents } from '../ai/retrieval/packFormat.js';
 import { Retriever } from '../ai/retrieval/Retriever.js';
 
 /**
@@ -66,7 +66,9 @@ export async function fetchPack({ base, fetchImpl, appVersion = APP_VERSION }) {
   }
 
   const parsed = {};
-  for (const [name, path] of Object.entries(PACK_FILES)) {
+  // Optional files (the campus map) are only fetched when the manifest lists them, and then checked like the others.
+  const wanted = [...Object.entries(PACK_FILES), ...Object.entries(OPTIONAL_PACK_FILES).filter(([, p]) => manifest.files.some((f) => f.path === p))];
+  for (const [name, path] of wanted) {
     const entry = manifest.files.find((f) => f.path === path);
     // The hash is part of the URL: each content version has its own cache entry, so a half-cached update can never
     // pair a new manifest with old files.
@@ -85,9 +87,9 @@ export async function fetchPack({ base, fetchImpl, appVersion = APP_VERSION }) {
     }
   }
 
-  const contentErrors = validatePackContents(manifest, parsed.documents, parsed.chunks, parsed.lexicon);
+  const contentErrors = validatePackContents(manifest, parsed.documents, parsed.chunks, parsed.lexicon, parsed.map ?? null);
   if (contentErrors.length) throw new PackError(`The knowledge pack is inconsistent: ${contentErrors[0]}`);
-  return { manifest, documents: parsed.documents, chunks: parsed.chunks, lexicon: parsed.lexicon };
+  return { manifest, documents: parsed.documents, chunks: parsed.chunks, lexicon: parsed.lexicon, map: parsed.map ?? null };
 }
 
 export class KnowledgePackService {
@@ -108,7 +110,7 @@ export class KnowledgePackService {
     return () => this.listeners.delete(fn);
   }
 
-  /** The loaded pack, or null: {manifest, retriever, lexicon}. */
+  /** The loaded pack, or null: {manifest, retriever, lexicon, map, documents, chunks}. map is null when the pack has no campus map. */
   get current() {
     return this.pack;
   }
@@ -129,9 +131,9 @@ export class KnowledgePackService {
   async #load() {
     this.#set({ status: 'loading', error: null, info: null });
     try {
-      const { manifest, documents, chunks, lexicon } = await fetchPack({ base: this.base, fetchImpl: this.fetchImpl, appVersion: this.appVersion });
+      const { manifest, documents, chunks, lexicon, map } = await fetchPack({ base: this.base, fetchImpl: this.fetchImpl, appVersion: this.appVersion });
       const retriever = new Retriever({ documents, chunks, lexicon }, { allowUnverified: manifest.contentLevel !== 'official', now: this.now });
-      this.pack = { manifest, retriever, lexicon };
+      this.pack = { manifest, retriever, lexicon, map, documents, chunks };
       this.#set({ status: 'ready', error: null, info: describePack(manifest, retriever) });
     } catch (error) {
       this.pack = null;

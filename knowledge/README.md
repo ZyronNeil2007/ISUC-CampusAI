@@ -61,3 +61,11 @@ Superseded and expired documents stay in the pack so CampusAI can say "that docu
 | `npm run pack:sample` | Build the fictional sample pack |
 | `npm run dev:sample` | Build the sample pack and start the dev server |
 | `npm run eval` | Retrieval and routing evaluation |
+
+## Campus map
+
+An optional `campus-map.yml` in this folder becomes the Campus Map page. Copy the shape from
+`samples/campus-map.yml`, but use real, verified positions only: leave `accessibility` out when it is not verified, and
+set `verificationStatus: verified` only after the Physical Plant or Planning office has confirmed the layout. An official
+pack refuses a map that is not verified. Without this file the map page says no map has been published. See
+`docs/campus-modules.md`.

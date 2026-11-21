@@ -1,3 +1,5 @@
+import { validateCampusMap } from '../../modules/campusMap.js';
+
 /**
  * Knowledge-pack format, shared by the build tool (Node) and the app (browser).
  * Pure functions only: no DOM and no Node APIs, so both sides validate identically.
@@ -37,6 +39,11 @@ export const STATUSES = Object.freeze([
  * sample:   synthetic test content; must never be presented as real.
  */
 export const CONTENT_LEVELS = Object.freeze(['official', 'draft', 'sample']);
+
+/** Files a pack may contain. When present they are listed in the manifest and checked like the required files. */
+export const OPTIONAL_PACK_FILES = Object.freeze({
+  map: 'metadata/map.json',
+});
 
 /** Files every pack must contain, relative to the pack directory. */
 export const PACK_FILES = Object.freeze({
@@ -249,7 +256,7 @@ export function validateManifest(m) {
  * Cross-check the parsed pack files against each other and the manifest.
  * Returns an array of error strings (empty when consistent).
  */
-export function validatePackContents(manifest, documents, chunks, lexicon) {
+export function validatePackContents(manifest, documents, chunks, lexicon, map = null) {
   const errors = [];
   if (!Array.isArray(documents)) return ['documents.json must contain an array'];
   if (!Array.isArray(chunks)) return ['chunks.json must contain an array'];
@@ -293,5 +300,6 @@ export function validatePackContents(manifest, documents, chunks, lexicon) {
       if (lexicon[f] !== undefined && !Array.isArray(lexicon[f])) errors.push(`lexicon.${f} must be an array`);
     }
   }
+  if (map !== null && map !== undefined) validateCampusMap(map).forEach((e) => errors.push(`campus map: ${e}`));
   return errors;
 }

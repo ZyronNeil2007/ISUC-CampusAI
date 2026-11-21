@@ -3,6 +3,7 @@ import './styles/global.css';
 import './styles/layout.css';
 import './styles/components.css';
 import './styles/chat.css';
+import './styles/modules.css';
 
 import { renderShell } from './components/layout/Shell.js';
 import { defineRoute, startRouter } from './app/router.js';
@@ -12,7 +13,11 @@ import { knowledgePack } from './ai/session.js';
 import home from './pages/home/home.js';
 import assistant from './pages/assistant/assistant.js';
 import settings from './pages/settings/settings.js';
-import { directory, campusMap, guide, announcements, about } from './pages/placeholders.js';
+import directory from './pages/directory/directory.js';
+import campusMap from './pages/map/map.js';
+import guide from './pages/guide/guide.js';
+import announcements from './pages/announcements/announcements.js';
+import { about } from './pages/placeholders.js';
 
 const shell = renderShell(document.getElementById('app'));
 

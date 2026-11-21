@@ -7,11 +7,11 @@ const POPULAR_QUESTIONS = [
 ];
 
 const CATEGORIES = [
-  { title: 'Academic Assistance', text: 'Programs, prerequisites, grading, shifting and graduation.', href: '#/guide' },
-  { title: 'Admission & Enrollment', text: 'CAT, requirements, schedules and enrollment steps.', href: '#/guide' },
+  { title: 'Academic Assistance', text: 'Programs, prerequisites, grading, shifting and graduation.', href: '#/guide?topic=academic' },
+  { title: 'Admission & Enrollment', text: 'CAT, requirements, schedules and enrollment steps.', href: '#/guide?topic=admission' },
   { title: 'Campus Directory', text: 'Offices, departments, buildings and services.', href: '#/directory' },
   { title: 'Campus Map', text: 'Find facilities around the campus.', href: '#/map' },
-  { title: 'Scholarships', text: 'Financial assistance and application requirements.', href: '#/guide' },
+  { title: 'Scholarships', text: 'Financial assistance and application requirements.', href: '#/guide?topic=scholarships' },
   { title: 'Announcements', text: 'Dated and verified campus updates.', href: '#/announcements' },
 ];
 

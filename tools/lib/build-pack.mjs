@@ -22,6 +22,7 @@ import YAML from 'yaml';
 import { chunkMarkdown, rowsToChunks, stripComments } from '../../src/ai/retrieval/ChunkManager.js';
 import {
   CONTENT_LEVELS,
+  OPTIONAL_PACK_FILES,
   PACK_FILES,
   PACK_FORMAT,
   parseVersion,
@@ -29,6 +30,7 @@ import {
   validateManifest,
   validatePackContents,
 } from '../../src/ai/retrieval/packFormat.js';
+import { validateCampusMap } from '../../src/modules/campusMap.js';
 import { findInjectionPhrases, findRawHtml, stripHiddenCharacters } from '../../src/ai/retrieval/safety.js';
 import { analyze } from '../../src/ai/retrieval/tokenizer.js';
 import { parseCsv } from './csv.mjs';
@@ -57,7 +59,7 @@ const DOC_FIELD_ORDER = [
 ];
 
 const MAX_STARTER_QUESTIONS = 12;
-const IGNORED_FILES = /(^|\/)(pack\.yml|lexicon\.yml|readme\.md)$|\.meta\.yml$/i;
+const IGNORED_FILES = /(^|\/)(pack\.yml|lexicon\.yml|campus-map\.yml|readme\.md)$|\.meta\.yml$/i;
 const UNPACKAGED_TYPES = /\.(pdf|docx?|pptx?|xlsx?|html?|txt|rtf|odt|png|jpe?g|gif|webp)$/i;
 
 /* ---------- reading sources ---------- */
@@ -408,6 +410,25 @@ export async function buildPack(options) {
   }
   const lexicon = compileLexicon(lexiconRaw, { errors, warnings });
 
+  // Optional campus map (campus-map.yml). Without it the Campus Map page says no map has been published.
+  let campusMap = null;
+  try {
+    const mapText = await readFile(path.join(sourceDir, 'campus-map.yml'), 'utf8');
+    campusMap = parseYaml(normalizeNewlines(mapText), 'campus-map.yml', errors) ?? null;
+  } catch {
+    /* no map in this pack */
+  }
+  if (campusMap) {
+    validateCampusMap(campusMap).forEach((e) => errors.push(`campus-map.yml: ${e}`));
+    if (contentLevel === 'official' && campusMap.verificationStatus !== 'verified') {
+      errors.push('campus-map.yml: an official pack needs a map with verificationStatus: verified');
+    }
+    if (JSON.stringify(campusMap).includes('TODO')) {
+      (campusMap.verificationStatus === 'verified' ? errors : warnings).push('campus-map.yml: still contains "TODO"');
+    }
+    if (contentLevel === 'sample' && campusMap.sample !== true) errors.push('campus-map.yml: a map in a sample pack must say sample: true');
+  }
+
   if (errors.length || !config) return { ...result, skipped, documents, chunks, lexicon };
 
   // Assemble the pack files.
@@ -415,6 +436,7 @@ export async function buildPack(options) {
     { path: PACK_FILES.chunks, content: `${JSON.stringify(chunks)}\n` },
     { path: PACK_FILES.documents, content: `${JSON.stringify(documents, null, 2)}\n` },
     { path: PACK_FILES.lexicon, content: `${JSON.stringify(lexicon, null, 2)}\n` },
+    ...(campusMap ? [{ path: OPTIONAL_PACK_FILES.map, content: `${JSON.stringify(campusMap, null, 2)}\n` }] : []),
   ]
     .map((f) => ({ ...f, bytes: Buffer.byteLength(f.content, 'utf8'), sha256: sha256(Buffer.from(f.content, 'utf8')) }))
     .sort((a, b) => byText(a.path, b.path));
@@ -442,7 +464,7 @@ export async function buildPack(options) {
     verification: { integrity: 'sha256', signed: false },
   };
 
-  errors.push(...validateManifest(manifest), ...validatePackContents(manifest, documents, chunks, lexicon));
+  errors.push(...validateManifest(manifest), ...validatePackContents(manifest, documents, chunks, lexicon, campusMap));
   if (errors.length) return { ...result, skipped, documents, chunks, lexicon, manifest };
 
   const manifestContent = `${JSON.stringify(manifest, null, 2)}\n`;

@@ -1,0 +1,75 @@
+# SAMPLE campus map. Fictional layout for Sample University, used to test CampusAI's map page.
+# It must never be presented as the real Isabela State University campus.
+title: Sample University campus (fictional schematic)
+sample: true
+verificationStatus: draft
+source: Sample University Campus Plan (fictional)
+lastVerifiedAt: 2026-08-01
+width: 100
+height: 64
+buildings:
+  - id: administration-building
+    name: Administration Building
+    category: administration
+    x: 8
+    y: 6
+    w: 26
+    h: 14
+    entrance: [20, 24]
+    description: Fictional. Registrar, Admissions and Cashier.
+  - id: student-services-building
+    name: Student Services Building
+    category: student_services
+    x: 66
+    y: 6
+    w: 26
+    h: 14
+    entrance: [80, 24]
+    description: Fictional. Scholarship, student affairs, clinic and guidance offices.
+    accessibility: Fictional sample note. Ground-floor entrance has a ramp.
+  - id: library-building
+    name: Library Building
+    category: library
+    x: 8
+    y: 40
+    w: 24
+    h: 16
+    entrance: [20, 36]
+    description: Fictional. University library and reading rooms.
+  - id: technology-building
+    name: Technology Building
+    category: academic
+    x: 68
+    y: 42
+    w: 24
+    h: 14
+    entrance: [80, 38]
+    description: Fictional. Information technology office and computer laboratories.
+  - id: sample-gymnasium
+    name: Sample Gymnasium
+    category: facility
+    x: 40
+    y: 46
+    w: 20
+    h: 12
+    entrance: [50, 42]
+    description: Fictional covered court for classes and events.
+nodes:
+  - id: central-quad
+    label: Central quadrangle
+    x: 50
+    y: 30
+  - id: north-walk
+    x: 20
+    y: 30
+  - id: east-walk
+    x: 80
+    y: 30
+walkways:
+  - [administration-building, north-walk]
+  - [north-walk, central-quad]
+  - [north-walk, library-building]
+  - [central-quad, east-walk]
+  - [east-walk, student-services-building]
+  - [east-walk, technology-building]
+  - [central-quad, sample-gymnasium]

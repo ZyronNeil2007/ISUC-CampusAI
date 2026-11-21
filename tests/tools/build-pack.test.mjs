@@ -434,3 +434,61 @@ test('the sample corpus in knowledge/samples builds cleanly and exercises validi
   assert.ok(result.lexicon.starterQuestions.length >= 4);
   assert.match(result.manifest.campus, /fictional/);
 });
+
+/* ---------- campus map (optional pack file) ---------- */
+
+const MAP_YML = (overrides = '') => `title: Test campus
+verificationStatus: verified
+source: Campus plan 2026
+lastVerifiedAt: 2026-02-01
+width: 50
+height: 40
+buildings:
+  - id: main-hall
+    name: Main Hall
+    category: administration
+    x: 5
+    y: 5
+    w: 10
+    h: 8
+${overrides}`;
+
+test('a pack without campus-map.yml has no map file', async () => {
+  const result = await build(await makeSource(base({ 'enrollment/guide.md': doc() })));
+  assert.ok(result.ok);
+  assert.ok(!result.manifest.files.some((f) => f.path === 'metadata/map.json'));
+});
+
+test('campus-map.yml becomes a hashed pack file listed in the manifest', async () => {
+  const result = await build(await makeSource(base({ 'enrollment/guide.md': doc(), 'campus-map.yml': MAP_YML() })));
+  assert.deepEqual(result.errors, []);
+  const entry = result.manifest.files.find((f) => f.path === 'metadata/map.json');
+  assert.ok(entry);
+  const content = await readFile(path.join(result.outDir, 'metadata/map.json'));
+  assert.equal(entry.sha256, sha(content));
+  assert.equal(JSON.parse(content).buildings[0].name, 'Main Hall');
+});
+
+test('an invalid map stops the build with the problem named', async () => {
+  const result = await build(await makeSource(base({ 'enrollment/guide.md': doc(), 'campus-map.yml': MAP_YML().replace('administration', 'castle') })));
+  assert.ok(!result.ok);
+  assert.match(result.errors.join('\n'), /campus-map\.yml: .*category must be one of/);
+});
+
+test('an official pack needs a verified map; a draft map is refused', async () => {
+  const result = await build(await makeSource(base({ 'enrollment/guide.md': doc(), 'campus-map.yml': MAP_YML().replace('verificationStatus: verified', 'verificationStatus: draft') })));
+  assert.ok(!result.ok);
+  assert.match(result.errors.join('\n'), /needs a map with verificationStatus: verified/);
+});
+
+test('a verified map cannot contain TODO; a sample pack needs sample: true on its map', async () => {
+  const todo = await build(await makeSource(base({ 'enrollment/guide.md': doc(), 'campus-map.yml': MAP_YML().replace('Main Hall', 'TODO name') })));
+  assert.match(todo.errors.join('\n'), /TODO/);
+  const sample = await buildPack({
+    sourceDir: await makeSource(base({ 'enrollment/guide.md': doc({ sample: true }), 'campus-map.yml': MAP_YML().replace('verified', 'draft') })),
+    contentLevel: 'sample',
+    createdAt: '2026-11-20T00:00:00.000Z',
+    write: false,
+  });
+  assert.match(sample.errors.join('\n'), /must say sample: true/);
+});
